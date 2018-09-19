@@ -6,12 +6,13 @@
 
 ## List below here, in a comment/comments, the people you worked with on this assignment AND any resources you used to find code (50 point deduction for not doing so). If none, write "None".
 
-
+# Lauren Zielinski
 
 ## [PROBLEM 1] - 150 points
 ## Below is code for one of the simplest possible Flask applications. Edit the code so that once you run this application locally and go to the URL 'http://localhost:5000/class', you see a page that says "Welcome to SI 364!"
 
-from flask import Flask
+from flask import Flask, request
+import requests, json, secrets
 app = Flask(__name__)
 app.debug = True
 
@@ -19,13 +20,82 @@ app.debug = True
 def hello_to_you():
     return 'Hello!'
 
+@app.route('/class')
+def welcome_class():
+    return 'Welcome to SI 364!'
+
+@app.route('/movie/<moviename>')
+def movie_name(moviename):
+    base_url = 'https://itunes.apple.com/search?'
+    req = requests.get(base_url, params= {'term' : moviename})
+    list_of_data = json.loads(req.text)
+    return json.dumps(list_of_data, indent=4)
+
+@app.route('/question')
+def fav_number():
+    formstring = """ <br><br>
+    <form action="http://localhost:5000/doubleresult" method='GET'>
+    <h1> Enter your favorite number! </h1>
+    <input type="text" name="number"> <br>
+    <input type="submit" value="Submit">
+    </form>
+    """
+    return formstring
+
+@app.route('/doubleresult', methods=['GET'])
+def double_num():
+    if request.method == 'GET':
+        number = request.args.get('number', '')
+        new_num = int(number) * 2
+        return "Double your favorite number is " + str(new_num)
+
+@app.route('/problem4form', methods=["GET", "POST"])
+def load_form():
+    html_form = '''
+    <html>
+    <body>
+    <form action = "http://localhost:5000/problem4form" method = "POST">
+        <h1> Favorite Things </h1>
+        <label> Enter Your Name: <input type "text" name="name"> </label> <br>
+        <h2> Age </h2>
+  <input type="text" name="age">
+  <h2> University of Michigan Status </h2>
+  <input type="checkbox" name="status1" value="Student"> Student <br>
+  <input type="checkbox" name="status2" value="Staff"> Staff <br>
+  <input type="checkbox" name="status3" value="Faculty"> Faculty <br>
+  <input type="checkbox" name="status4" value="Other"> Other <br>
+  <h2> Ice Cream Flavor </h2>
+  <input type="text" name="icecream" <br>
+  <h2> Pizza or Burgers, or Both? </h2>
+  <input type="checkbox" name="food1" value="Pizza"> Pizza <br>
+  <input type="checkbox" name="food2" value="Burgers"> Burgers <br>
+  <h2> Favorite Season </h2>
+    <input type="checkbox" name="season1" value="Fall"> Fall <br>
+    <input type="checkbox" name="season2" value="Winter"> Winter <br>
+  <input type="checkbox" name="season3" value="Spring"> Spring <br>
+  <input type="checkbox" name="season4" value="Summer"> Summer <br>
+        <input type="submit" value="Submit"/>
+    </form>
+    </body>
+    </html>
+    '''
+
+    if request.method == 'POST':
+        new_string = " "
+        for x in request.form:
+            var = request.form.get(x, '')
+            new_string += "<br>" + var
+        return html_form + " Your answers!" + new_string
+
+    return html_form + 'Nothing is selected!'
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
 
 ## [PROBLEM 2] - 250 points
-## Edit the code chunk above again so that if you go to the URL 'http://localhost:5000/movie/<name-of-movie-here-one-word>' you see a big dictionary of data on the page. For example, if you go to the URL 'http://localhost:5000/movie/ratatouille', you should see something like the data shown in the included file sample_ratatouille_data.txt, which contains data about the animated movie Ratatouille. However, if you go to the url http://localhost:5000/movie/titanic, you should get different data, and if you go to the url 'http://localhost:5000/movie/dsagdsgskfsl' for example, you should see data on the page that looks like this:
+## Edit the code chunk above again so that if you go to the URL 'http://localhost:5000/movie/<name-of-movie-here-one-word>' you see a big dictionary of data on the page.
+# For example, if you go to the URL 'http://localhost:5000/movie/ratatouille', you should see something like the data shown in the included file sample_ratatouille_data.txt, which contains data about the animated movie Ratatouille. However, if you go to the url http://localhost:5000/movie/titanic, you should get different data, and if you go to the url 'http://localhost:5000/movie/dsagdsgskfsl' for example, you should see data on the page that looks like this:
 
 # {
 #  "resultCount":0,
